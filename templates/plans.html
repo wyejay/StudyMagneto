@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-tasks"></i> Study Plans
+        </h2>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Add New Plan Form -->
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Create New Study Plan</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('plans') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Plan Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Prepare for Midterm Exam" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Details about the plan..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Subject</label>
+                        <select name="subject_id" class="form-select">
+                            <option value="">No Subject</option>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}">{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Due Date</label>
+                            <input type="date" name="due_date" class="form-control" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Priority</label>
+                            <select name="priority" class="form-select">
+                                <option value="high">High</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mt-4">
+                        <i class="fas fa-plus"></i> Create Study Plan
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plans List -->
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">All Study Plans ({{ plans|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if plans %}
+                    <div class="list-group">
+                        {% for plan in plans %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ plan.title }}</h6>
+                                    <p class="text-muted small mb-2">{{ plan.description or 'No description' }}</p>
+                                    
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        {% if plan.subject %}
+                                        <span class="subject-badge" style="background-color: {{ plan.subject.color }};">
+                                            {{ plan.subject.name }}
+                                        </span>
+                                        {% endif %}
+                                        
+                                        <span class="badge bg-{{ 'danger' if plan.priority == 'high' else 'warning' if plan.priority == 'medium' else 'secondary' }}">
+                                            {{ plan.priority|capitalize }}
+                                        </span>
+                                        
+                                        <span class="badge bg-info">
+                                            Due: {{ plan.due_date.strftime('%b %d, %Y') }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="text-end">
+                                    <!-- Progress Update Form -->
+                                    <form method="POST" action="{{ url_for('update_plan', plan_id=plan.id) }}" class="d-inline">
+                                        <select name="status" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
+                                            <option value="not_started" {% if plan.status == 'not_started' %}selected{% endif %}>Not Started</option>
+                                            <option value="in_progress" {% if plan.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                            <option value="completed" {% if plan.status == 'completed' %}selected{% endif %}>Completed</option>
+                                        </select>
+                                        
+                                        <input type="range" name="progress" class="form-range" min="0" max="100" value="{{ plan.progress }}" 
+                                               oninput="this.nextElementSibling.value = this.value" onchange="this.form.submit()">
+                                        <output class="small">{{ plan.progress }}%</output>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <a href="{{ url_for('delete_item', model='plan', id=plan.id) }}" 
+                                   class="btn btn-outline-danger btn-sm"
+                                   onclick="return confirm('Delete this study plan?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-tasks fa-4x mb-3"></i>
+                        <p>No study plans yet.</p>
+                        <p class="small">Create your first study plan using the form.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
