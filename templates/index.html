@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-home"></i> Dashboard
+            <small class="text-muted">Welcome back!</small>
+        </h2>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Today's Timetable -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock"></i> Today's Schedule ({{ today }})
+                </h5>
+                <a href="{{ url_for('timetable') }}" class="btn btn-light btn-sm">Full Timetable</a>
+            </div>
+            <div class="card-body">
+                {% if today_slots %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Subject</th>
+                                    <th>Location</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for slot in today_slots %}
+                                <tr>
+                                    <td><strong>{{ slot.start_time }} - {{ slot.end_time }}</strong></td>
+                                    <td>
+                                        <span class="subject-badge" style="background-color: {{ slot.subject.color }};">
+                                            {{ slot.subject.name }}
+                                        </span>
+                                    </td>
+                                    <td>{{ slot.location or '-' }}</td>
+                                    <td>{{ slot.notes or '-' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-calendar fa-3x mb-3"></i>
+                        <p>No classes scheduled for today.</p>
+                        <a href="{{ url_for('timetable') }}" class="btn btn-outline-primary">Add Today's Classes</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Upcoming Study Plans -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-tasks"></i> Upcoming Plans</h5>
+                <a href="{{ url_for('plans') }}" class="btn btn-outline-primary btn-sm">All Plans</a>
+            </div>
+            <div class="card-body">
+                {% if upcoming_plans %}
+                    <div class="list-group">
+                        {% for plan in upcoming_plans %}
+                        <a href="{{ url_for('plans') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">{{ plan.title }}</h6>
+                                    <small class="text-muted">
+                                        Due: {{ plan.due_date.strftime('%b %d, %Y') }}
+                                        {% if plan.subject %}
+                                            • <span class="badge" style="background-color: {{ plan.subject.color }}; color: white;">{{ plan.subject.name }}</span>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-{{ 'warning' if plan.priority == 'high' else 'info' if plan.priority == 'medium' else 'secondary' }}">
+                                        {{ plan.priority|capitalize }}
+                                    </span>
+                                    <div class="mt-2">
+                                        <div class="progress" style="height: 8px; width: 120px;">
+                                            <div class="progress-bar" role="progressbar" style="width: {{ plan.progress }}%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        No upcoming plans. 
+                        <a href="{{ url_for('plans') }}">Create one now</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Stats -->
+    <div class="col-lg-4">
+        <!-- Quick Stats -->
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h1 class="display-4 fw-bold text-primary mb-0">{{ "%.1f"|format(total_hours) }}</h1>
+                <p class="text-muted mb-0">Total Study Hours</p>
+                <hr>
+                <button onclick="window.location.href='{{ url_for('progress') }}'" class="btn btn-success w-100">
+                    <i class="fas fa-plus"></i> Log New Session
+                </button>
+            </div>
+        </div>
+
+        <!-- Subjects Overview -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-book"></i> Your Subjects</h5>
+            </div>
+            <div class="card-body">
+                {% if subjects %}
+                    <div class="row g-2">
+                        {% for subject in subjects %}
+                        <div class="col-6">
+                            <div class="subject-badge w-100 text-center" style="background-color: {{ subject.color }};">
+                                {{ subject.name }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No subjects yet.</p>
+                    <a href="{{ url_for('subjects') }}" class="btn btn-primary btn-sm">Add Subjects</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
