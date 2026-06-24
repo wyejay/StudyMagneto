@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-book"></i> Subjects
+        </h2>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Add New Subject Form -->
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Add New Subject</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('subjects') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Subject Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Mathematics" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Color</label>
+                        <input type="color" name="color" value="#3b82f6" class="form-control form-control-color w-100">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-plus"></i> Add Subject
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subjects List -->
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Your Subjects ({{ subjects|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if subjects %}
+                    <div class="row g-3">
+                        {% for subject in subjects %}
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <div style="background-color: {{ subject.color }}; width: 50px; height: 50px;" 
+                                         class="rounded-circle d-flex align-items-center justify-content-center text-white me-3">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h5 class="mb-1">{{ subject.name }}</h5>
+                                        <small class="text-muted">ID: #{{ subject.id }}</small>
+                                    </div>
+                                    <a href="{{ url_for('delete_item', model='subject', id=subject.id) }}" 
+                                       class="btn btn-outline-danger btn-sm"
+                                       onclick="return confirm('Delete this subject? All related data will be affected.')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-book fa-4x mb-3"></i>
+                        <p>No subjects added yet.</p>
+                        <p class="small">Add your first subject using the form on the left.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
