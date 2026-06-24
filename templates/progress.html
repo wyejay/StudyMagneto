@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-chart-bar"></i> Study Progress
+        </h2>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Log New Session -->
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Log Study Session</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('progress') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Subject</label>
+                        <select name="subject_id" class="form-select" required>
+                            <option value="">Select Subject</option>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}">{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Hours Studied</label>
+                        <input type="number" name="hours" step="0.1" min="0.1" class="form-control" placeholder="e.g. 2.5" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Topics Covered</label>
+                        <textarea name="topics" class="form-control" rows="3" 
+                                  placeholder="What did you study today? (e.g. Calculus Chapter 5, Integration by parts)"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">How productive was this session? (1-5)</label>
+                        <input type="range" name="rating" min="1" max="5" value="4" class="form-range" 
+                               oninput="this.nextElementSibling.value = this.value">
+                        <output class="form-control text-center">4</output>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-save"></i> Log Session
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Logs & Stats -->
+    <div class="col-lg-7">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Study Sessions</h5>
+            </div>
+            <div class="card-body">
+                {% if logs %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Subject</th>
+                                    <th>Hours</th>
+                                    <th>Topics</th>
+                                    <th>Rating</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in logs %}
+                                <tr>
+                                    <td>{{ log.date.strftime('%b %d, %Y') }}</td>
+                                    <td>
+                                        <span class="subject-badge" style="background-color: {{ log.subject.color }};">
+                                            {{ log.subject.name }}
+                                        </span>
+                                    </td>
+                                    <td><strong>{{ log.hours }} hrs</strong></td>
+                                    <td>{{ log.topics or '-' }}</td>
+                                    <td>
+                                        {% for i in range(5) %}
+                                            <i class="fas fa-star" style="color: {% if i < log.rating %}#ffc107{% else %}#e0e0e0{% endif %}"></i>
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('delete_item', model='log', id=log.id) }}" 
+                                           class="btn btn-outline-danger btn-sm"
+                                           onclick="return confirm('Delete this log?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-chart-bar fa-4x mb-3"></i>
+                        <p>No study sessions logged yet.</p>
+                        <p class="small">Start tracking your progress by logging your first session.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Hours by Subject -->
+        {% if subject_hours %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Hours Breakdown by Subject</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for name, hours in subject_hours %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ name }}</span>
+                        <strong>{{ "%.1f"|format(hours) }} hrs</strong>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
