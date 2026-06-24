@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-clock"></i> Weekly Timetable
+        </h2>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Add New Slot Form -->
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Add New Time Slot</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('timetable') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Day</label>
+                        <select name="day" class="form-select" required>
+                            {% for day in days %}
+                            <option value="{{ day }}">{{ day }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Start Time</label>
+                            <input type="time" name="start_time" class="form-control" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">End Time</label>
+                            <input type="time" name="end_time" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 mt-3">
+                        <label class="form-label">Subject</label>
+                        <select name="subject_id" class="form-select" required>
+                            <option value="">Select Subject</option>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}">{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Location (Optional)</label>
+                        <input type="text" name="location" class="form-control" placeholder="e.g. Room 305">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Notes (Optional)</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="Additional notes..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-plus"></i> Add to Timetable
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timetable List -->
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">All Scheduled Slots</h5>
+            </div>
+            <div class="card-body">
+                {% if slots %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Time</th>
+                                    <th>Subject</th>
+                                    <th>Location</th>
+                                    <th>Notes</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for slot in slots %}
+                                <tr>
+                                    <td><strong>{{ slot.day }}</strong></td>
+                                    <td>{{ slot.start_time }} - {{ slot.end_time }}</td>
+                                    <td>
+                                        <span class="subject-badge" style="background-color: {{ slot.subject.color }};">
+                                            {{ slot.subject.name }}
+                                        </span>
+                                    </td>
+                                    <td>{{ slot.location or '-' }}</td>
+                                    <td>{{ slot.notes or '-' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('delete_item', model='slot', id=slot.id) }}" 
+                                           class="btn btn-outline-danger btn-sm"
+                                           onclick="return confirm('Delete this timetable slot?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-calendar fa-4x mb-3"></i>
+                        <p>No timetable slots added yet.</p>
+                        <p class="small">Use the form to start building your weekly schedule.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
