@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+
+# Database
+studyhub.db
+
+# Uploaded files
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+*.log
+app.log
+
+# Runtime
+flask.pid
+instance/
